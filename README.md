@@ -25,6 +25,7 @@ This project helps elderly people and patients who often forget their medication
 
 ## Circuit diagram 
 
+
 ## Working Principle
 1. The user sets the medicine time.
 2. The RTC module keeps track of real time.
