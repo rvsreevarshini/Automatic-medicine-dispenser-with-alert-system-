@@ -1,0 +1,84 @@
+#include <Wire.h>
+#include <RTClib.h>
+#include <Servo.h>
+#include <LiquidCrystal.h>
+
+Servo servo;
+RTC_DS3231 rtc;
+
+const int servoPin = 6, buttonPin = 9, ledPin = 7, buzzerPin = 8;
+int angle = 0, angleIncrement = 45, newAngle, movementDelay = 50;
+int lastTriggerMinute = -1;
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  pinMode(buttonPin, INPUT);
+  pinMode(ledPin, OUTPUT);
+  pinMode(buzzerPin, OUTPUT);
+  servo.attach(servoPin);
+  servo.write(angle);
+  lcd.begin(16, 2);
+  Serial.begin(9600);
+
+  if (!rtc.begin()) {
+    lcd.print("RTC not found!");
+    while (1);
+  }
+
+  // rtc.adjust(DateTime(2025, 6, 16, 7, 59, 50)); // Optional: only set once
+}
+
+void loop() {
+  DateTime now = rtc.now();
+  updateLCD(now);
+
+  int m = now.minute();
+  int s = now.second();
+
+  // Trigger once every new minute at second 0
+  if (s == 0 && m != lastTriggerMinute) {
+    lastTriggerMinute = m;
+
+    newAngle = angle + angleIncrement;
+    if (newAngle <= 180) {
+      while (angle < newAngle) {
+        angle++;
+        servo.write(angle);
+        delay(movementDelay);
+      }
+      flashLED(4, 150);
+    } else {
+      while (angle > 0) {
+        angle--;
+        servo.write(angle);
+        delay(movementDelay);
+      }
+    }
+  }
+}
+
+void flashLED(int numFlashes, int flashDelay) {
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Take medicine!");
+  for (int i = 0; i < numFlashes; i++) {
+    digitalWrite(ledPin, HIGH); digitalWrite(buzzerPin, HIGH);
+    delay(flashDelay);
+    digitalWrite(ledPin, LOW); digitalWrite(buzzerPin, LOW);
+    delay(flashDelay);
+  }
+  while (digitalRead(buttonPin) == LOW) {}
+  delay(1000);
+  lcd.clear();
+}
+
+void updateLCD(DateTime now) {
+  lcd.setCursor(0, 0);
+  char buf[17];
+  sprintf(buf, "%02d/%02d/%04d", now.month(), now.day(), now.year());
+  lcd.print(buf);
+  lcd.setCursor(0, 1);
+  sprintf(buf, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
+  lcd.print(buf);
+}
