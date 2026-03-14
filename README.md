@@ -24,7 +24,8 @@ This project helps elderly people and patients who often forget their medication
 [Run the Simulation on Wokwi](https://wokwi.com/projects/433921106885273601)
 
 ## Hardware Prototype
-![Prototype](IMG-20251124-WA0000.jpg)
+
+![Hardware Prototype](images/IMG-20251124-WA0000.jpg)
 
 ## Working Principle
 1. The user sets the medicine time.
